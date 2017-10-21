@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Shopping</string>
+    <string name="more_info">更多产品信息</string>
+    <string name="give_order">一键下单</string>
+    <string name="share">分享商品</string>
+    <string name="uninterested">不感兴趣</string>
+    <string name="more_sale_info">查看更多商品促销信息</string>
+    <string name="yes">确定</string>
+    <string name="cancel">取消</string>
+    <string name="delete_warning_title">移除商品</string>
+    <string name="delete_warning_msg">从购物车移除%s？</string>
+</resources>
