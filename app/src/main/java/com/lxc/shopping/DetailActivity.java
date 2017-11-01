@@ -1,15 +1,20 @@
 package com.lxc.shopping;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lxc.shopping.bean.GoodsItemBean;
 import com.lxc.shopping.event.AddToShopListEvent;
+import com.lxc.shopping.receiver.additionReceiver;
+import com.lxc.shopping.widget.ShoppingWidget;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -24,18 +29,46 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 	ImageView ivGoods;
 	private boolean isStar = false;
 	private boolean isToShopList = false;
+	private int shopCnt = 0;
 	GoodsItemBean goodsItem;
+	ListView optionsListView;
+	static public String JUMP_GOODS_INFO = "goodsInfo";
+	static public String ADDITION_BROADCAST_INFO_ITEM = "broadcastInfoItem";
+	static public String ADDITION_WIDGET_BROADCAST_INFO_ITEM = "widgetBroadcastInfoItem";
+	static public String ADDITION_BROADCAST_INFO_INT = "broadcastInfoInt";
+	static public String BROADCAST_ACTION = "com.lxc.my.ADDITION";
+	static public String BROADCAST_WIDGET_ACTION = "com.lxc.my.WIDGET_ADDITION";
+	additionReceiver receiver;
+	ShoppingWidget shoppingWidget;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		getSupportActionBar().hide();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.detail_layout);
+
+		IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION);
+		receiver = new additionReceiver();
+		registerReceiver(receiver, intentFilter);
+
+		IntentFilter widgetIntentFilter = new IntentFilter(BROADCAST_WIDGET_ACTION);
+		shoppingWidget = new ShoppingWidget();
+		registerReceiver(shoppingWidget, widgetIntentFilter);
+
 		tvName = (TextView) findViewById(R.id.tv_goods_name);
 		tvPrice = (TextView) findViewById(R.id.tv_price);
 		tvType = (TextView) findViewById(R.id.tv_type);
 		tvMoreInfo = (TextView) findViewById(R.id.tv_more_info);
 		ivGoods = (ImageView) findViewById(R.id.iv_goods);
+		optionsListView = (ListView) findViewById(R.id.lv_options);
+		String[] optionNames = {
+				getString(R.string.give_order),
+				getString(R.string.share),
+				getString(R.string.uninterested),
+				getString(R.string.more_sale_info)};
+		ArrayAdapter<String> optionAdapter = new ArrayAdapter<>(this, R.layout.options_item, optionNames);
+		optionsListView.setAdapter(optionAdapter);
 
 		ivBack = (ImageView) findViewById(R.id.iv_back);
 		ivBack.setOnClickListener(this);
@@ -49,11 +82,10 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
 	private void initData() {
 		Intent i = getIntent();
-		goodsItem = (GoodsItemBean) i.getSerializableExtra(GoodsActivity.JUMP_INFO);
+		goodsItem = (GoodsItemBean) i.getSerializableExtra(GoodsActivity.JUMP_DETAIL_INFO);
 		tvName.setText(goodsItem.name);
 		tvPrice.setText(goodsItem.price);
 		tvType.setText(goodsItem.type + " " + goodsItem.furtherInformation);
-		//tvMoreInfo.setText(goodsItem.furtherInformation);
 		ivGoods.setImageResource(goodsItem.imageRes);
 	}
 
@@ -61,10 +93,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 	public void onClick(View v) {
 		switch (v.getId()){
 			case R.id.iv_back:
-				if (isToShopList){
-					AddToShopListEvent event = new AddToShopListEvent(goodsItem);
-					EventBus.getDefault().post(event);
-				}
 				finish();
 				break;
 			case R.id.iv_star:
@@ -74,6 +102,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 				addToShopList();
 		}
 	}
+
 
 	/**
 	 * 改变“收藏”状态
@@ -93,14 +122,27 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 	 * 物品加入购物车
 	 */
 	private void addToShopList(){
-		isToShopList = true;
+
+		AddToShopListEvent event = new AddToShopListEvent(goodsItem);
+		EventBus.getDefault().postSticky(event);
+
+		/*Intent intent = new Intent(BROADCAST_ACTION);
+		intent.putExtra(ADDITION_BROADCAST_INFO_ITEM, goodsItem);
+		intent.putExtra(ADDITION_BROADCAST_INFO_INT, shopCnt);*/
+		Intent intent = new Intent(BROADCAST_WIDGET_ACTION);
+		intent.putExtra(ADDITION_WIDGET_BROADCAST_INFO_ITEM, goodsItem);
+		sendBroadcast(intent, null);
+
+		shopCnt++;
+
 		Toast.makeText(this, "商品已添加到购物车", Toast.LENGTH_SHORT).show();
+
 	}
 
 	@Override
-	public void onBackPressed() {
-		super.onBackPressed();//这里面已经进行finish了
-		AddToShopListEvent event = new AddToShopListEvent(goodsItem);
-		EventBus.getDefault().post(event);
+	protected void onDestroy() {
+		super.onDestroy();
+		unregisterReceiver(receiver);
+		unregisterReceiver(shoppingWidget);
 	}
 }

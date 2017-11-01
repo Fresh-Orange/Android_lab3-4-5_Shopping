@@ -3,6 +3,7 @@ package com.lxc.shopping.bean;
 import java.io.Serializable;
 
 /**
+ * 一个商品的全部属性
  * Created by LaiXiancheng on 2017/10/19.
  * Email: lxc.sysu@qq.com
  */

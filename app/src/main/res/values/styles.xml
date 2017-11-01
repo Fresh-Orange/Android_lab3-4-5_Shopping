@@ -9,7 +9,6 @@
     </style>
 
     <style name="ButtonTheme" parent="AppTheme">
-        <!-- Customize your theme here. -->
         <item name="colorAccent">@color/white</item>
     </style>
 </resources>

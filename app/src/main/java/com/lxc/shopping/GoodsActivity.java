@@ -9,9 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.lxc.shopping.animator.FadeItemAnimator;
 import com.lxc.shopping.bean.GoodsItemBean;
 import com.lxc.shopping.event.AddToShopListEvent;
 import com.lxc.shopping.listener.recyItemClickListener;
@@ -22,18 +24,25 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GoodsActivity extends AppCompatActivity implements View.OnClickListener{
 	List<GoodsItemBean> goodsItems = new ArrayList<>();
 	List<GoodsItemBean> shopItems = new ArrayList<>();
 	FloatingActionButton fab_shop;
 	FloatingActionButton fab_main;
+	FloatingActionButton fab_top;
 	RecyclerView recyclerView;
 	ListView listView;
 	ShopItemAdapter listAdapter;
 	GoodsItemAdapter recycleAdapter;
 
-	static public String JUMP_INFO = "itemInfo";
+	static public String JUMP_DETAIL_INFO = "itemInfo";
+	static public String JUMP_WIDGET_DETAIL_INFO = "widgetItemInfo";
+	static public String LAUNCH_BROADCAST_INFO = "broadcastInfo";
+	static public String LAUNCH_WIDGET_BROADCAST_INFO = "widgetBroadcastInfo";
+	static public String LAUNCH_WIDGET_ACTION = "com.lxc.my.LAUNCH_WIDGET";
+	private Boolean isHandled = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +56,14 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 		fab_shop.setOnClickListener(this);
 		fab_main = (FloatingActionButton) findViewById(R.id.fb_goods);
 		fab_main.setOnClickListener(this);
+		fab_top = (FloatingActionButton) findViewById(R.id.fb_top);
+		fab_top.setOnClickListener(this);
 
 		recycleAdapter = new GoodsItemAdapter(this, goodsItems, new recyItemClickListener() {
 			@Override
 			public void onClick(int position) {
 				Intent i = new Intent(GoodsActivity.this, DetailActivity.class);
-				i.putExtra(JUMP_INFO, goodsItems.get(position));
+				i.putExtra(JUMP_DETAIL_INFO, goodsItems.get(position));
 				startActivity(i);
 			}
 
@@ -69,24 +80,68 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 		recyclerView = (RecyclerView) findViewById(R.id.rcv_goods);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		recyclerView.setAdapter(recycleAdapter);
+		FadeItemAnimator itemAnimator = new FadeItemAnimator();
+		itemAnimator.setRemoveDuration(1000);//时间长一点，比较能看出效果
+		recyclerView.setItemAnimator(itemAnimator);
 
-		listAdapter = new ShopItemAdapter(shopItems, this, new recyItemClickListener() {
-			@Override
-			public void onClick(int position) {
-				Intent i = new Intent(GoodsActivity.this, DetailActivity.class);
-				i.putExtra(JUMP_INFO, shopItems.get(position));
-				startActivity(i);
-			}
-
-			@Override
-			public void onLongClick(int position) {
-				showDeleteDialog(position);
-			}
-		});
+		listAdapter = new ShopItemAdapter(shopItems, this);
 		listView = (ListView) findViewById(R.id.lv_shop_list);
 		listView.setAdapter(listAdapter);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				//第一项是提示信息，不设置监听器
+				if (position == 0)
+					return;
+
+				Intent i = new Intent(GoodsActivity.this, DetailActivity.class);
+				i.putExtra(JUMP_DETAIL_INFO, shopItems.get(position));
+				startActivity(i);
+			}
+		});
+		listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				//第一项是提示信息，不设置监听器
+				if (position == 0)
+					return true;
+				showDeleteDialog(position);
+				return true;
+			}
+		});
+
 
 		initData();
+
+		sendHotBroadcast();
+
+		boolean b = getIntent().getBooleanExtra(DetailActivity.JUMP_GOODS_INFO, false);
+		if (b){//如果是通知栏发过来的
+			showShoppingCart(true);
+		}
+	}
+
+
+/*	@Override
+	protected void onRestart() {
+		super.onRestart();
+		if (!isHandled){
+			boolean b = getIntent().getBooleanExtra(DetailActivity.JUMP_GOODS_INFO, false);
+			if (b){//如果是通知栏发过来的
+				showShoppingCart(true);
+			}
+		}
+		isHandled = false;
+	}*/
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		boolean b = intent.getBooleanExtra(DetailActivity.JUMP_GOODS_INFO, false);
+		if (b){//如果是通知栏发过来的
+			showShoppingCart(true);
+		}
+		isHandled = true;
 	}
 
 	/**
@@ -138,24 +193,47 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 	public void onClick(View v) {
 		switch (v.getId()){
 			case R.id.fb_shoplist:
-				fab_shop.setVisibility(View.GONE);
-				fab_main.setVisibility(View.VISIBLE);
-				recyclerView.setVisibility(View.GONE);
-				listView.setVisibility(View.VISIBLE);
-
-				listAdapter.notifyDataSetChanged();
-
+				showShoppingCart(true);
 				break;
 			case R.id.fb_goods:
-				fab_shop.setVisibility(View.VISIBLE);
-				fab_main.setVisibility(View.GONE);
-				recyclerView.setVisibility(View.VISIBLE);
-				listView.setVisibility(View.GONE);
+				showShoppingCart(false);
+				break;
+			case R.id.fb_top:
+				recyclerView.smoothScrollToPosition(0);
 				break;
 		}
 	}
 
-	@Subscribe(threadMode = ThreadMode.MAIN)
+	private void showShoppingCart(boolean b){
+		if (b){
+			fab_shop.setVisibility(View.GONE);
+			fab_main.setVisibility(View.VISIBLE);
+			recyclerView.setVisibility(View.GONE);
+			fab_top.setVisibility(View.GONE);
+			listView.setVisibility(View.VISIBLE);
+		}
+		else{
+			fab_shop.setVisibility(View.VISIBLE);
+			fab_main.setVisibility(View.GONE);
+			recyclerView.setVisibility(View.VISIBLE);
+			fab_top.setVisibility(View.VISIBLE);
+			listView.setVisibility(View.GONE);
+		}
+	}
+
+	/**
+	 * 发送产生“热卖”通知的广播
+	 */
+	private void sendHotBroadcast() {
+		/*Intent intent = new Intent("com.lxc.my.LAUNCH");*/
+		Intent intent = new Intent(LAUNCH_WIDGET_ACTION);
+		Random random = new Random();
+		int randIndex = random.nextInt(goodsItems.size());
+		intent.putExtra(LAUNCH_WIDGET_BROADCAST_INFO, goodsItems.get(randIndex));
+		sendOrderedBroadcast(intent, null);
+	}
+
+	@Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
 	public void onMessageEvent(AddToShopListEvent event) {
 		shopItems.add(event.getItemAdded());
 		listAdapter.notifyDataSetChanged();

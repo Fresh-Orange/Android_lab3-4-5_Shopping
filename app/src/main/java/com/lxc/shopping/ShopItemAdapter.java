@@ -8,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.lxc.shopping.bean.GoodsItemBean;
-import com.lxc.shopping.listener.recyItemClickListener;
 
 import java.util.List;
 
@@ -20,12 +19,10 @@ import java.util.List;
 public class ShopItemAdapter extends BaseAdapter {
 	private List<GoodsItemBean> goodsList;
 	private Context context;
-	private recyItemClickListener itemClickListener;
 
-	public ShopItemAdapter(List<GoodsItemBean> goodsList, Context context, recyItemClickListener itemClickListener) {
+	public ShopItemAdapter(List<GoodsItemBean> goodsList, Context context) {
 		this.goodsList = goodsList;
 		this.context = context;
-		this.itemClickListener = itemClickListener;
 	}
 
 	@Override
@@ -68,25 +65,6 @@ public class ShopItemAdapter extends BaseAdapter {
 		holder.tvName.setText(name);
 		String price = goodsList.get(position).price;
 		holder.tvPrice.setText(price);
-
-		//第一项是提示信息，不设置监听器
-		if (position == 0)
-			return itemView;
-
-		//设置监听器
-		itemView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				itemClickListener.onClick(position);
-			}
-		});
-		itemView.setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				itemClickListener.onLongClick(position);
-				return true;
-			}
-		});
 
 		return itemView;
 	}

@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:id="@+id/wg_whole"
+                android:padding="@dimen/widget_margin">
+
+    <ImageView
+        android:id="@+id/iv_goods"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/shoplist"/>
+    <TextView
+        android:id="@+id/tv_msg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:layout_gravity="center_vertical"
+        android:text="@string/appwidget_default_text"
+        android:textColor="@android:color/white"
+        android:textSize="15sp"/>
+
+</LinearLayout>

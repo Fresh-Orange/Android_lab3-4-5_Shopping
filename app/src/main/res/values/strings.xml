@@ -9,4 +9,6 @@
     <string name="cancel">取消</string>
     <string name="delete_warning_title">移除商品</string>
     <string name="delete_warning_msg">从购物车移除%s？</string>
+    <string name="appwidget_default_text">当前没有任何信息</string>
+    <string name="add_widget">Add widget</string>
 </resources>

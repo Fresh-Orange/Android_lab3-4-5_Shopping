@@ -12,14 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone">
-
     </ListView>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rcv_goods"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
     </android.support.v7.widget.RecyclerView>
+
     <android.support.design.widget.FloatingActionButton
         android:theme="@style/ButtonTheme"
         android:id="@+id/fb_shoplist"
@@ -43,5 +42,17 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:visibility="gone"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:theme="@style/ButtonTheme"
+        android:id="@+id/fb_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:elevation="5dp"
+        android:src="@mipmap/ic_top"
+        android:layout_marginBottom="80dp"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"/>
 
 </RelativeLayout>

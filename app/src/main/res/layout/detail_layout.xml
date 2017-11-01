@@ -91,6 +91,7 @@
                 app:layout_constraintRight_toLeftOf="@id/iv_shop"
                 android:layout_marginRight="@dimen/common_margin"/>
         </android.support.constraint.ConstraintLayout>
+
         <include layout="@layout/line_gap"/>
         <TextView
             android:id="@+id/tv_more_info"
@@ -106,38 +107,13 @@
             android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
             android:background="@color/line_color"/>
-        <TextView
+
+        <ListView
+            android:id="@+id/lv_options"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/give_order"
-            android:textSize="@dimen/goods_font_size"
-            android:textColor="@color/font_black"
-            android:layout_margin="@dimen/common_margin"/>
-        <include layout="@layout/line_gap"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/share"
-            android:textSize="@dimen/goods_font_size"
-            android:textColor="@color/font_black"
-            android:layout_margin="@dimen/common_margin"/>
-        <include layout="@layout/line_gap"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/uninterested"
-            android:textSize="@dimen/goods_font_size"
-            android:textColor="@color/font_black"
-            android:layout_margin="@dimen/common_margin"/>
-        <include layout="@layout/line_gap"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/more_sale_info"
-            android:textSize="@dimen/goods_font_size"
-            android:textColor="@color/font_black"
-            android:layout_margin="@dimen/common_margin"/>
-        <include layout="@layout/line_gap"/>
+            android:layout_height="wrap_content">
+
+        </ListView>
     </LinearLayout>
 
 </LinearLayout>
