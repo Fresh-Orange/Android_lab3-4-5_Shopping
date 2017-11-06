@@ -26,16 +26,24 @@
                 <action android:name="com.lxc.my.LAUNCH"/>
             </intent-filter>
         </receiver>
+
         <receiver android:name=".widget.ShoppingWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-                <!--action android:name="com.lxc.my.WIDGET_ADDITION"/>-->
+                <!-- action android:name="com.lxc.my.WIDGET_ADDITION"/ -->
                 <action android:name="com.lxc.my.LAUNCH_WIDGET"/>
+                <action android:name="com.lxc.action.widgetInitClick"/>
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/shopping_widget_info"/>
+        </receiver>
+
+        <receiver
+            android:name=".widget.additionWidgetReceiver"
+            android:enabled="true"
+            android:exported="true">
         </receiver>
     </application>
 

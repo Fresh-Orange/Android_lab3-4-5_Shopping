@@ -14,7 +14,7 @@ import android.widget.Toast;
 import com.lxc.shopping.bean.GoodsItemBean;
 import com.lxc.shopping.event.AddToShopListEvent;
 import com.lxc.shopping.receiver.additionReceiver;
-import com.lxc.shopping.widget.ShoppingWidget;
+import com.lxc.shopping.widget.additionWidgetReceiver;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -39,7 +39,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 	static public String BROADCAST_ACTION = "com.lxc.my.ADDITION";
 	static public String BROADCAST_WIDGET_ACTION = "com.lxc.my.WIDGET_ADDITION";
 	additionReceiver receiver;
-	ShoppingWidget shoppingWidget;
+	additionWidgetReceiver widgetReceiver;
 
 
 	@Override
@@ -53,8 +53,8 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 		registerReceiver(receiver, intentFilter);
 
 		IntentFilter widgetIntentFilter = new IntentFilter(BROADCAST_WIDGET_ACTION);
-		shoppingWidget = new ShoppingWidget();
-		registerReceiver(shoppingWidget, widgetIntentFilter);
+		widgetReceiver = new additionWidgetReceiver();
+		registerReceiver(widgetReceiver, widgetIntentFilter);
 
 		tvName = (TextView) findViewById(R.id.tv_goods_name);
 		tvPrice = (TextView) findViewById(R.id.tv_price);
@@ -126,9 +126,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 		AddToShopListEvent event = new AddToShopListEvent(goodsItem);
 		EventBus.getDefault().postSticky(event);
 
-		/*Intent intent = new Intent(BROADCAST_ACTION);
-		intent.putExtra(ADDITION_BROADCAST_INFO_ITEM, goodsItem);
-		intent.putExtra(ADDITION_BROADCAST_INFO_INT, shopCnt);*/
 		Intent intent = new Intent(BROADCAST_WIDGET_ACTION);
 		intent.putExtra(ADDITION_WIDGET_BROADCAST_INFO_ITEM, goodsItem);
 		sendBroadcast(intent, null);
@@ -143,6 +140,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 	protected void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(receiver);
-		unregisterReceiver(shoppingWidget);
+		unregisterReceiver(widgetReceiver);
 	}
 }

@@ -21,11 +21,14 @@ public class additionReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.d("activity_create", "receive");
+
 		GoodsItemBean itemBean = (GoodsItemBean) intent.getSerializableExtra(DetailActivity.ADDITION_BROADCAST_INFO_ITEM);
 		int id = intent.getIntExtra(DetailActivity.ADDITION_BROADCAST_INFO_INT, 0);
+
 		Intent intent1 = new Intent(context, GoodsActivity.class);
 		intent1.putExtra(DetailActivity.JUMP_GOODS_INFO, true);
-		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent1, 0);
+		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
+
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
 		builder.setContentTitle("马上下单")
 				.setContentText(itemBean.name + "已加入购物车")

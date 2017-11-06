@@ -8,6 +8,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -17,6 +19,7 @@ import com.lxc.shopping.animator.FadeItemAnimator;
 import com.lxc.shopping.bean.GoodsItemBean;
 import com.lxc.shopping.event.AddToShopListEvent;
 import com.lxc.shopping.listener.recyItemClickListener;
+import com.lxc.shopping.widget.ShoppingWidget;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -26,7 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GoodsActivity extends AppCompatActivity implements View.OnClickListener{
+public class GoodsActivity extends AppCompatActivity implements View.OnClickListener {
+	static public String JUMP_DETAIL_INFO = "itemInfo";
+	static public String JUMP_WIDGET_DETAIL_INFO = "widgetItemInfo";
+	static public String LAUNCH_BROADCAST_INFO = "broadcastInfo";
+	static public String LAUNCH_WIDGET_BROADCAST_INFO = "widgetBroadcastInfo";
+	static public String LAUNCH_WIDGET_ACTION = "com.lxc.my.LAUNCH_WIDGET";
 	List<GoodsItemBean> goodsItems = new ArrayList<>();
 	List<GoodsItemBean> shopItems = new ArrayList<>();
 	FloatingActionButton fab_shop;
@@ -36,12 +44,6 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 	ListView listView;
 	ShopItemAdapter listAdapter;
 	GoodsItemAdapter recycleAdapter;
-
-	static public String JUMP_DETAIL_INFO = "itemInfo";
-	static public String JUMP_WIDGET_DETAIL_INFO = "widgetItemInfo";
-	static public String LAUNCH_BROADCAST_INFO = "broadcastInfo";
-	static public String LAUNCH_WIDGET_BROADCAST_INFO = "widgetBroadcastInfo";
-	static public String LAUNCH_WIDGET_ACTION = "com.lxc.my.LAUNCH_WIDGET";
 	private Boolean isHandled = false;
 
 	@Override
@@ -95,7 +97,7 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 					return;
 
 				Intent i = new Intent(GoodsActivity.this, DetailActivity.class);
-				i.putExtra(JUMP_DETAIL_INFO, shopItems.get(position));
+				i.putExtra(JUMP_DETAIL_INFO, shopItems.get(position - 1));
 				startActivity(i);
 			}
 		});
@@ -116,7 +118,7 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 		sendHotBroadcast();
 
 		boolean b = getIntent().getBooleanExtra(DetailActivity.JUMP_GOODS_INFO, false);
-		if (b){//如果是通知栏发过来的
+		if (b) {//如果是通知栏发过来的
 			showShoppingCart(true);
 		}
 	}
@@ -135,17 +137,21 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 	}*/
 
 	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		boolean b = intent.getBooleanExtra(DetailActivity.JUMP_GOODS_INFO, false);
-		if (b){//如果是通知栏发过来的
+	protected void onNewIntent(Intent newIntent) {
+		super.onNewIntent(newIntent);
+		boolean b = newIntent.getBooleanExtra(DetailActivity.JUMP_GOODS_INFO, false);
+		if (b) {//如果是通知栏发过来的
 			showShoppingCart(true);
+			Intent intent = new Intent(ShoppingWidget.WIDGET_INIT_ACTION);
+			sendBroadcast(intent, null);
+			Log.d("newintent", "send");
 		}
 		isHandled = true;
 	}
 
 	/**
 	 * 展示删除的警告对话框
+	 *
 	 * @param position
 	 */
 	private void showDeleteDialog(final int position) {
@@ -171,27 +177,30 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 		builder.show();
 	}
 
-	private  void initData(){
-		goodsItems.add(new GoodsItemBean("Enchated Forest", "¥ 5.00", "作者" ,"Johanna Basford", R.drawable.enchatedforest));
-		goodsItems.add(new GoodsItemBean("Arla Milk", "¥ 59.00", "产地" ,"德国", R.drawable.arla));
-		goodsItems.add(new GoodsItemBean("Devondale Milk", "¥ 79.00", "产地" ,"澳大利亚", R.drawable.devondale));
-		goodsItems.add(new GoodsItemBean("Kindle Oasis", "¥ 2399.00", "版本" ,"8GB", R.drawable.kindle));
-		goodsItems.add(new GoodsItemBean("waitrose 早餐麦片", "¥ 179.00", "重量" ,"2Kg", R.drawable.waitrose));
-		goodsItems.add(new GoodsItemBean("Mcvitie's 饼干", "¥ 14.90", "产地" ,"英国", R.drawable.mcvitie));
-		goodsItems.add(new GoodsItemBean("Ferrero Rocher", "¥ 132.59", "重量" ,"300g", R.drawable.ferrero));
-		goodsItems.add(new GoodsItemBean("Maltesers", "¥ 141.43", "重量" ,"118g", R.drawable.maltesers));
-		goodsItems.add(new GoodsItemBean("Lindt", "¥ 139.43", "重量" ,"249g", R.drawable.lindt));
-		goodsItems.add(new GoodsItemBean("Borggreve", "¥ 28.90", "重量" ,"640g", R.drawable.borggreve));
+	private void initData() {
+		goodsItems.add(new GoodsItemBean("Enchated Forest", "¥ 5.00", "作者", "Johanna Basford", R.drawable.enchatedforest));
+		goodsItems.add(new GoodsItemBean("Arla Milk", "¥ 59.00", "产地", "德国", R.drawable.arla));
+		goodsItems.add(new GoodsItemBean("Devondale Milk", "¥ 79.00", "产地", "澳大利亚", R.drawable.devondale));
+		goodsItems.add(new GoodsItemBean("Kindle Oasis", "¥ 2399.00", "版本", "8GB", R.drawable.kindle));
+		goodsItems.add(new GoodsItemBean("waitrose 早餐麦片", "¥ 179.00", "重量", "2Kg", R.drawable.waitrose));
+		goodsItems.add(new GoodsItemBean("Mcvitie's 饼干", "¥ 14.90", "产地", "英国", R.drawable.mcvitie));
+		goodsItems.add(new GoodsItemBean("Ferrero Rocher", "¥ 132.59", "重量", "300g", R.drawable.ferrero));
+		goodsItems.add(new GoodsItemBean("Maltesers", "¥ 141.43", "重量", "118g", R.drawable.maltesers));
+		goodsItems.add(new GoodsItemBean("Lindt", "¥ 139.43", "重量", "249g", R.drawable.lindt));
+		goodsItems.add(new GoodsItemBean("Borggreve", "¥ 28.90", "重量", "640g", R.drawable.borggreve));
 
 		recycleAdapter.notifyDataSetChanged();
 
-		shopItems.add(new GoodsItemBean("购物车", "价格", "", "", -1));
+		/*shopItems.add(new GoodsItemBean("购物车", "价格", "", "", -1));
 		listAdapter.notifyDataSetChanged();
+		this.view*/
+		View headerView = LayoutInflater.from(this).inflate(R.layout.shop_item, null);
+		listView.addHeaderView(headerView);
 	}
 
 	@Override
 	public void onClick(View v) {
-		switch (v.getId()){
+		switch (v.getId()) {
 			case R.id.fb_shoplist:
 				showShoppingCart(true);
 				break;
@@ -204,15 +213,14 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 		}
 	}
 
-	private void showShoppingCart(boolean b){
-		if (b){
+	private void showShoppingCart(boolean b) {
+		if (b) {
 			fab_shop.setVisibility(View.GONE);
 			fab_main.setVisibility(View.VISIBLE);
 			recyclerView.setVisibility(View.GONE);
 			fab_top.setVisibility(View.GONE);
 			listView.setVisibility(View.VISIBLE);
-		}
-		else{
+		} else {
 			fab_shop.setVisibility(View.VISIBLE);
 			fab_main.setVisibility(View.GONE);
 			recyclerView.setVisibility(View.VISIBLE);
@@ -230,7 +238,7 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 		Random random = new Random();
 		int randIndex = random.nextInt(goodsItems.size());
 		intent.putExtra(LAUNCH_WIDGET_BROADCAST_INFO, goodsItems.get(randIndex));
-		sendOrderedBroadcast(intent, null);
+		sendBroadcast(intent, null);
 	}
 
 	@Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
