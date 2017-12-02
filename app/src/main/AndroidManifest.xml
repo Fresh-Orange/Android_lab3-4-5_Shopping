@@ -26,7 +26,6 @@
                 <action android:name="com.lxc.my.LAUNCH"/>
             </intent-filter>
         </receiver>
-
         <receiver android:name=".widget.ShoppingWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
@@ -39,12 +38,14 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/shopping_widget_info"/>
         </receiver>
-
         <receiver
             android:name=".widget.additionWidgetReceiver"
             android:enabled="true"
             android:exported="true">
         </receiver>
+
+        <activity android:name=".ConfigurationActivity">
+        </activity>
     </application>
 
 </manifest>

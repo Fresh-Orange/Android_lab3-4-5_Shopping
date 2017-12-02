@@ -50,6 +50,7 @@ public class GoodsActivity extends AppCompatActivity implements View.OnClickList
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().hide();
+
 		setContentView(R.layout.activity_goods);
 
 		EventBus.getDefault().register(this);
